@@ -25,4 +25,12 @@ public class DatabaseConnection {
     Query query = entityManager.createNativeQuery("SELECT * FROM tnbs", TnbDao.class);
     return query.getResultList();
   }
+
+  //saw tnbDao.getTNB too late
+  public List<TnbDao> getTNB(String tnb){
+    Query query = entityManager.createNativeQuery("SELECT tnb FROM tnbs WHERE tnb = ?", TnbDao.class);
+    query.setParameter(1, tnb);
+    return  query.getResultList();
+  }
+
 }

@@ -1,13 +1,17 @@
 package com.sippy.wrapper.parent;
 
 import com.sippy.wrapper.parent.database.DatabaseConnection;
+import com.sippy.wrapper.parent.database.dao.TnbDao;
 import com.sippy.wrapper.parent.request.JavaTestRequest;
 import com.sippy.wrapper.parent.response.JavaTestResponse;
 import java.util.*;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.json.JSONObject;
 
 @Stateless
 public class WrappedMethods {
@@ -37,4 +41,58 @@ public class WrappedMethods {
 
     return jsonResponse;
   }
+
+  public List<JSONObject> getTnbList(JSONObject json){
+    JSONObject params = json.optJSONObject("params");
+
+    LOGGER.info("Fetching TNB list from the database");
+     List<TnbDao> allTnbs = databaseConnection.getAllTnbs();
+
+     //this feels wrong, but getTnb() returns string
+    String number = params.getNumber("number").toString();
+
+
+    final String[] dbTnb = new String[1];
+
+    if(number != null && allTnbs != null){
+      allTnbs.forEach(tnb -> {
+        if (tnb.getTnb() == number){
+        dbTnb[0] = tnb.getTnb();
+        }
+      });
+    }
+
+   final List<JSONObject> tnbList = new ArrayList<>();
+
+  JSONObject deutscheTelekom = new JSONObject();
+
+      try {
+          deutscheTelekom.put("number",  "D001");
+      } catch (JSONException e) {
+          throw new RuntimeException(e);
+      }
+
+      try {
+          deutscheTelekom.put("name", "Deutsche Telekom");
+      } catch (JSONException e) {
+          throw new RuntimeException(e);
+      }
+
+      if(dbTnb != null && dbTnb[0] == "D001") {
+      tnbList.add(deutscheTelekom);
+    }
+
+    allTnbs.forEach( tnb ->
+    {
+      if(tnb.getTnb().matches("(D146|D218|D248)")){
+        //next;
+      };
+      // push to tnbList
+    });
+
+    //sort tnbList
+
+    return tnbList;
+  }
+
 }
